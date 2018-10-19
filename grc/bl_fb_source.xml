@@ -4,7 +4,7 @@
   <key>bl_fb_source</key>
   <category>[bl]</category>
   <import>import bl</import>
-  <make>bl.fb_source($filename)</make>
+  <make>bl.fb_source($filename, $output_size)</make>
   <!-- Make one 'param' node for every Parameter you want settable from the GUI.
        Sub-nodes:
        * name
@@ -14,6 +14,11 @@
     <name>Path</name>
     <key>filename</key>
     <type>string</type>
+  </param>
+  <param>
+    <name>Num Items</name>
+    <key>output_size</key>
+    <type>int</type>
   </param>
 
   <!-- Make one 'sink' node per input. Sub-nodes:
@@ -34,5 +39,6 @@ Make one 'source' node per output. Sub-nodes:
   <source>
     <name>out</name>
     <type>float</type>
+    <vlen>$output_size</vlen>
   </source>
 </block>

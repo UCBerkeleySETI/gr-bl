@@ -22,24 +22,35 @@
 import numpy
 from gnuradio import gr
 from blimpy import Waterfall
+import numpy as np
 
 class fb_source(gr.sync_block):
     """
-    docstring for block fb_source
+    Generates vectors from a Filterbank file.
+	You can use the 'Vector to Stream' block to
+	convert this into a stream.
+	TODO: save frequency data into variables
     """
-    def __init__(self, filename):
+    def __init__(self, filename, output_size):
         gr.sync_block.__init__(self,
             name="fb_source",
             in_sig=None,
-            out_sig=[numpy.float32])
-	self.signals = Waterfall(filename)
+            out_sig=[(numpy.float32, output_size)])
+ 	self.signals = Waterfall(filename)
 	self.frequencies, self.data = self.signals.grab_data()
+#	self.data = np.arange(8192 * output_size) # for testing when filterbank files are too big to load
+	self.data = self.data.reshape(-1, output_size)
+        self.data_generator = output_generator(self.data)
 	
-
 
     def work(self, input_items, output_items):
         out = output_items[0]
-        # <+signal processing here+>
-        out[:] = [0]
+	try:
+            out[:] = next(self.data_generator)
+	except StopIteration:
+	    self.data_generator = output_generator(self.data)
         return len(output_items[0])
 
+def output_generator(data):
+    for row in data:
+	yield row
