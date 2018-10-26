@@ -31,16 +31,17 @@ class fb_source(gr.sync_block):
 	convert this into a stream.
 	TODO: save frequency data into variables
     """
-    def __init__(self, filename, output_size):
+    def __init__(self, filename, output_size, time_intervals):
         gr.sync_block.__init__(self,
             name="fb_source",
             in_sig=None,
             out_sig=[(numpy.float32, output_size)])
- 	self.signals = Waterfall(filename)
-	self.frequencies, self.data = self.signals.grab_data()
-#	self.data = np.arange(8192 * output_size) # for testing when filterbank files are too big to load
-	self.data = self.data.reshape(-1, output_size)
-        self.data_generator = output_generator(self.data)
+	self.filename = filename
+	self.output_size = output_size
+	self.current_time = 0
+	self.time_intervals = time_intervals
+	self.set_data()
+        self.data_generator = self.output_generator()
 	
 
     def work(self, input_items, output_items):
@@ -48,9 +49,23 @@ class fb_source(gr.sync_block):
 	try:
             out[:] = next(self.data_generator)
 	except StopIteration:
-	    self.data_generator = output_generator(self.data)
+	    self.set_data()
+	    self.data_generator = self.output_generator()
         return len(output_items[0])
 
-def output_generator(data):
-    for row in data:
-	yield row
+    def output_generator(self):
+	norm = np.average(np.random.choice(self.data[0], 10))
+	for row in self.data:
+	    yield self.normalize(row, norm)
+    
+    def normalize(self, row, norm):
+	return np.divide(row, norm)
+
+    def set_data(self):
+	self.signals = Waterfall(self.filename, t_start=self.current_time, t_stop=(self.current_time + self.time_intervals))
+	self.frequencies, self.data = self.signals.grab_data()
+	num_freq = self.data.shape[1] // self.output_size
+	range_keep = np.arange(start=0, stop=self.output_size * num_freq, step=num_freq)
+	self.data = self.data[:,range_keep]
+	self.current_time += self.time_intervals
+	

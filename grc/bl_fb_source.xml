@@ -1,10 +1,10 @@
 <?xml version="1.0"?>
 <block>
-  <name>fb_source</name>
+  <name>Fil Source</name>
   <key>bl_fb_source</key>
   <category>[bl]</category>
   <import>import bl</import>
-  <make>bl.fb_source($filename, $output_size)</make>
+  <make>bl.fb_source($filename, $output_size, $time_intervals)</make>
   <!-- Make one 'param' node for every Parameter you want settable from the GUI.
        Sub-nodes:
        * name
@@ -18,6 +18,11 @@
   <param>
     <name>Num Items</name>
     <key>output_size</key>
+    <type>int</type>
+  </param>
+  <param>
+    <name>Time Intervals</name>
+    <key>time_intervals</key>
     <type>int</type>
   </param>
 
