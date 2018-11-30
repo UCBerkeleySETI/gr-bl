@@ -36,36 +36,41 @@ class fb_source(gr.sync_block):
             name="fb_source",
             in_sig=None,
             out_sig=[(numpy.float32, output_size)])
+	self.file_length = None
 	self.filename = filename
 	self.output_size = output_size
 	self.current_time = 0
 	self.time_intervals = time_intervals
 	self.set_data()
+	self.min_freq = self.frequencies[0]
+	self.max_freq = self.frequencies[len(self.frequencies) - 1]
+	self.num_freq = self.data.shape[1] // self.output_size
+	print(self.min_freq, self.max_freq)
         self.data_generator = self.output_generator()
-	
 
     def work(self, input_items, output_items):
         out = output_items[0]
 	try:
             out[:] = next(self.data_generator)
 	except StopIteration:
+	    print('getting new data...')
+	    if self.current_time > self.file_length:
+		self.current_time = 0
 	    self.set_data()
 	    self.data_generator = self.output_generator()
+	    out[:] = next(self.data_generator)
         return len(output_items[0])
 
     def output_generator(self):
-	norm = np.average(np.random.choice(self.data[0], 10))
 	for row in self.data:
-	    yield self.normalize(row, norm)
-    
-    def normalize(self, row, norm):
-	return np.divide(row, norm)
+	    row = np.nanmean(np.pad(row.astype(float), (0, (self.num_freq - row.size%self.num_freq) %self.num_freq), mode='constant', constant_values=np.NaN).reshape(-1, self.num_freq), axis=1)
+	    yield row[:self.output_size] # this slices off the last values; potential need to fix this by averaging whatever's left & appending
 
     def set_data(self):
+	print('time: ' + str(self.current_time))
 	self.signals = Waterfall(self.filename, t_start=self.current_time, t_stop=(self.current_time + self.time_intervals))
+	if not self.file_length:
+	    self.file_length = self.signals.n_ints_in_file
 	self.frequencies, self.data = self.signals.grab_data()
-	num_freq = self.data.shape[1] // self.output_size
-	range_keep = np.arange(start=0, stop=self.output_size * num_freq, step=num_freq)
-	self.data = self.data[:,range_keep]
 	self.current_time += self.time_intervals
 	
