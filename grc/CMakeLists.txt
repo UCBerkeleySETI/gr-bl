@@ -18,8 +18,5 @@
 # Boston, MA 02110-1301, USA.
 
 install(FILES
-    bl_ml.xml
-    bl_fb_source.xml
-    bl_guppi_source.xml
-    bl_multistream_qt.xml DESTINATION share/gnuradio/grc/blocks
+    bl_guppi_source.xml DESTINATION share/gnuradio/grc/blocks
 )
