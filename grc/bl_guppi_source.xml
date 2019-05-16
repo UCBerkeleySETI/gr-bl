@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<block>
+  <name>guppi_source</name>
+  <key>bl_guppi_source</key>
+  <category>[bl]</category>
+  <import>import bl</import>
+  <make>bl.guppi_source($filename, $chan)</make>
+  <!-- Make one 'param' node for every Parameter you want settable from the GUI.
+       Sub-nodes:
+       * name
+       * key (makes the value accessible as $keyname, e.g. in the make node)
+       * type -->
+  <param>
+    <name>Path</name>
+    <key>filename</key>
+    <type>string</type>
+  </param>
+
+  <param>
+    <name>Channel_index</name>
+    <key>chan</key>
+    <type>int</type>
+  </param>
+
+  <!-- Make one 'sink' node per input. Sub-nodes:
+       * name (an identifier for the GUI)
+       * type
+       * vlen
+       * optional (set to 1 for optional inputs) -->
+
+
+  <!-- Make one 'source' node per output. Sub-nodes:
+       * name (an identifier for the GUI)
+       * type
+       * vlen
+       * optional (set to 1 for optional inputs) -->
+  <source>
+    <name>out</name>
+    <type>complex</type>
+  </source>
+  <source>
+    <name>out</name>
+    <type>complex</type>
+  </source>
+</block>

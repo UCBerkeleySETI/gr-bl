@@ -21,9 +21,11 @@
 
 import numpy
 from gnuradio import gr
-from blimpy import Waterfall
+#from blimpy import Waterfall
 import numpy as np
 
+def Waterfall(a, b):
+	return None
 class fb_source(gr.sync_block):
     """
     Generates vectors from a Filterbank file.
