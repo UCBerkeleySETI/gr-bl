@@ -22,7 +22,7 @@ from vispy import gloo
 from vispy import app
 import numpy as np
 from gnuradio import gr
-
+import math
 
 VERT_SHADER = """
 #version 120
@@ -100,9 +100,10 @@ void main() {
 
 
 class Canvas(app.Canvas):
-    def __init__(self,nrows=8,ncols=8, n=1000):
+    def __init__(self,nrows=8,ncols=8, n=1000, streamer=None):
         app.Canvas.__init__(self, title='Use your wheel to zoom!',
                             keys='interactive')
+        self.streamer = streamer
         # Number of cols and rows in the table.
         self.nrows = nrows
         self.ncols = ncols
@@ -114,10 +115,11 @@ class Canvas(app.Canvas):
         self.n = n
 
         # Various signal amplitudes.
-        amplitudes = .1 + .2 * np.random.rand(self.m, 1).astype(np.float32)
+        self.amplitudes = .1 + .2 * np.random.rand(self.m, 1).astype(np.float32)
 
         # Generate the signals as a (m, n) array.
-        y = amplitudes * np.random.randn(self.m, self.n).astype(np.float32)
+        self.y = self.amplitudes * np.random.randn(self.m, self.n).astype(np.float32)
+        self.y = np.zeros_like(self.y)
 
         # Color of each vertex (TODO: make it more efficient by using a GLSL-based
         # color map and the index).
@@ -128,10 +130,10 @@ class Canvas(app.Canvas):
         # within each signal).
         self.index = np.c_[np.repeat(np.repeat(np.arange(ncols), nrows), n),
                       np.repeat(np.tile(np.arange(nrows), ncols), n),
-                      np.tile(np.arange(n), m)].astype(np.float32)
+                      np.tile(np.arange(n), self.m)].astype(np.float32)
 
         self.program = gloo.Program(VERT_SHADER, FRAG_SHADER)
-        self.program['a_position'] = y.reshape(-1, 1)
+        self.program['a_position'] = self.y.reshape(-1, 1)
         self.program['a_color'] = self.color
         self.program['a_index'] = self.index
         self.program['u_scale'] = (1., 1.)
@@ -140,11 +142,10 @@ class Canvas(app.Canvas):
 
         gloo.set_viewport(0, 0, *self.physical_size)
 
-        self._timer = app.Timer('auto', connect=self.on_timer, start=True)
+        self._timer = app.Timer('auto', connect=self.on_timer, start=False)
 
         gloo.set_state(clear_color='black', blend=True,
                        blend_func=('src_alpha', 'one_minus_src_alpha'))
-
         self.show()
 
     def on_resize(self, event):
@@ -159,13 +160,10 @@ class Canvas(app.Canvas):
         self.update()
 
     def on_timer(self, event):
-        """Add some data at the end of each signal (real-time signals)."""
-        k = 100
-        y[:, :-k] = y[:, k:]
-        y[:, -k:] = amplitudes * np.random.randn(m, k)
-
-        self.program['a_position'].set_data(y.ravel().astype(np.float32))
+        self.program['a_position'].set_data(self.y.ravel().astype(np.float32))
         self.update()
+        print("success2", np.sum(self.y))
+        
 
     def on_draw(self, event):
         gloo.clear()
@@ -176,14 +174,35 @@ class multistream_qt(gr.sync_block):
     """
     docstring for block multistream_qt
     """
-    def __init__(self, nrows, ncols, n):
+    def __init__(self, nrows, ncols, n, m):
+        self.nrows = nrows
+        self.ncols = ncols
+        self.m = m
+        assert self.m == nrows*ncols
         gr.sync_block.__init__(self,
             name="multistream_qt",
-            in_sig=[np.complex64],
+            in_sig=[(np.complex64, n)]*self.m,
             out_sig=None)
-        self.canvas = Canvas(nrows=nrows, ncols=ncols, n)
+        self.canvas = Canvas(nrows=nrows, ncols=ncols, n=n, streamer=self)
         app.run()
+        print("initialized")
 
     def work(self, input_items, output_items):
-        pass
+        steps = input_items[0].shape[0]
+        for i in range(steps):
+            for j in range(self.m):
+                print(self.m, self.canvas.y.shape, input_items[0].shape)
+                self.canvas.y[j] = input_items[j][i].real
+            print(np.sum(self.canvas.y))
+            print("success", self.canvas.y[0][0])
+        return input_items[0].size
 
+
+if __name__=="__main__":
+    canvas = Canvas(nrows=2, ncols=2, n=1024)
+    app.run()
+    for i in range(100):
+        canvas.on_run(None)
+
+        app.process_events()
+        #canvas.events.draw()

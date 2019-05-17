@@ -31,7 +31,7 @@ except ImportError:
 	pass
 
 # import any pure python here
-from ml import ml
+from keras_train import keras_train
 from fb_source import fb_source
 from guppi_source import guppi_source
 from multistream_qt import multistream_qt

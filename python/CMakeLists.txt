@@ -33,7 +33,7 @@ GR_PYTHON_INSTALL(
     __init__.py
     guppi.py
     utils.py
-    ml.py
+    keras_train.py
     fb_source.py
     guppi_source.py
     multistream_qt.py DESTINATION ${GR_PYTHON_DIR}/bl
@@ -46,6 +46,5 @@ include(GrTest)
 
 set(GR_TEST_TARGET_DEPS gnuradio-bl)
 set(GR_TEST_PYTHON_DIRS ${CMAKE_BINARY_DIR}/swig)
-GR_ADD_TEST(qa_ml ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_ml.py)
 GR_ADD_TEST(qa_fb_source ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_fb_source.py)
 GR_ADD_TEST(qa_guppi_source ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_guppi_source.py)

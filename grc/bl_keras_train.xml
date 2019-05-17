@@ -1,10 +1,10 @@
 <?xml version="1.0"?>
 <block>
-  <name>ml</name>
-  <key>bl_ml</key>
+  <name>keras_train</name>
+  <key>bl_keras_train</key>
   <category>[bl]</category>
   <import>import bl</import>
-  <make>bl.ml($input_size, $path)</make>
+  <make>bl.keras_train($input_size, $path)</make>
   <!-- Make one 'param' node for every Parameter you want settable from the GUI.
        Sub-nodes:
        * name
@@ -37,9 +37,4 @@
        * type
        * vlen
        * optional (set to 1 for optional inputs) -->
-  <source>
-    <name>out</name>
-    <type>float</type>
-    <vlen>$input_size</vlen>
-  </source>
 </block>

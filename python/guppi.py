@@ -12,8 +12,6 @@ import numpy as np
 import os
 import time
 from pprint import pprint
-from astropy.coordinates import Angle
-
 from utils import unpack, rebin
 import sys
 
@@ -192,7 +190,7 @@ class GuppiRaw(object):
             dshape = (n_chan, int(n_samples), n_pol)
         return dshape
 
-    def get_data(self, chan=-1):
+    def get_data(self, chan=-1, nchan=1):
         """
         returns a generator object that reads data a block at a time;
         the generator prints "File depleted" and returns nothing when all data in the file has been read.
@@ -201,12 +199,12 @@ class GuppiRaw(object):
         with self as gen:
             while True:
                 try:
-                    yield gen.generator_read_next_data_block_int8(chan)
+                    yield gen.generator_read_next_data_block_int8(chan, nchan)
                 except EndOfFileError as e:
                     print("\nFile depleted")
                     raise StopIteration
 
-    def read_next_data_block_int8(self, chan=-1):
+    def read_next_data_block_int8(self, chan=-1, nchan=1):
         """
         Instantiates a new generator as self.data_gen if there wasn't one already
         Calls next() on the generator once and returns the value
@@ -214,7 +212,7 @@ class GuppiRaw(object):
         :return: header, data_x, data_y
         """
         if not self.data_gen:
-            self.data_gen = self.get_data(chan)
+            self.data_gen = self.get_data(chan, nchan)
         try:
             header, data_x, data_y = next(self.data_gen)
         except StopIteration:
@@ -223,7 +221,7 @@ class GuppiRaw(object):
         self._d_x, self._d_y = data_x, data_y
         return header, self._d_x, self._d_y
 
-    def generator_read_next_data_block_int8(self,chan=-1):
+    def generator_read_next_data_block_int8(self,chan=-1, nchan=1):
         """ Read the next block of data and its header
 
         Returns: (header, data)
@@ -239,7 +237,7 @@ class GuppiRaw(object):
         if chan > 0:
             data_idx = head_idx + chan * n_pol * int(n_bit / 8)
             blocsize //= 64
-            n_chan = 1
+            n_chan = nchan
         else:
             data_idx = head_idx
         self.file_obj.seek(data_idx,0)

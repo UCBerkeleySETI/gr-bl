@@ -4,7 +4,7 @@
   <key>bl_guppi_source</key>
   <category>[bl]</category>
   <import>import bl</import>
-  <make>bl.guppi_source($filename, $chan)</make>
+  <make>bl.guppi_source($filename, $chan, $nchan, $repeat)</make>
   <!-- Make one 'param' node for every Parameter you want settable from the GUI.
        Sub-nodes:
        * name
@@ -13,15 +13,33 @@
   <param>
     <name>Path</name>
     <key>filename</key>
-    <type>string</type>
+    <value></value>
+    <type>file_open</type>
   </param>
-
   <param>
     <name>Channel_index</name>
     <key>chan</key>
     <type>int</type>
   </param>
-
+  <param>
+    <name>Num_channels</name>
+    <key>nchan</key>
+    <type>int</type>
+  </param>
+  <param>
+    <name>Repeat</name>
+    <key>repeat</key>
+    <value>True</value>
+    <type>enum</type>
+    <option>
+      <name>Yes</name>
+      <key>True</key>
+    </option>
+    <option>
+      <name>No</name>
+      <key>False</key>
+    </option>
+  </param>
   <!-- Make one 'sink' node per input. Sub-nodes:
        * name (an identifier for the GUI)
        * type
@@ -37,9 +55,11 @@
   <source>
     <name>out</name>
     <type>complex</type>
+    <nports>$nchan</nports>
   </source>
   <source>
     <name>out</name>
     <type>complex</type>
+    <nports>$nchan</nports>
   </source>
 </block>
