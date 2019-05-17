@@ -179,7 +179,7 @@ class GuppiRaw(object):
         n_pol = int(header['NPOL'])
         n_bit = int(header['NBITS'])
         n_samples = int(int(header['BLOCSIZE']) / (n_chan * n_pol * (n_bit / 8)))
-
+        print("NP",n_pol, n_bit)
         is_chanmaj = False
         if 'CHANMAJ' in header.keys():
             if int(header['CHANMAJ']) == 1:
@@ -232,11 +232,13 @@ class GuppiRaw(object):
         #print(head_idx)
         n_chan = int(header['OBSNCHAN'])
         n_pol = int(header['NPOL'])  #should be 4
+        if n_pol == 2:
+            n_pol = 4
         n_bit = int(header['NBITS'])
         blocsize= int(header['BLOCSIZE'])
         if chan > 0:
             data_idx = head_idx + chan * n_pol * int(n_bit / 8)
-            blocsize //= 64
+            blocsize //= (64//nchan)
             n_chan = nchan
         else:
             data_idx = head_idx
@@ -349,8 +351,9 @@ class GuppiRaw(object):
 def cmd_tool():
     path = "/home/yunfanz/Downloads/blc3_guppi_57386_VOYAGER1_0004.0000.raw"
     reader = GuppiRaw(path)
+    print(reader.read_next_data_block_shape())
     for i in range(2):
-        h, x, y = reader.read_next_data_block_int8(chan=32)
+        h, x, y = reader.read_next_data_block_int8(chan=32, nchan=1)
         print(h)
         print(x.shape, y.shape)
     return

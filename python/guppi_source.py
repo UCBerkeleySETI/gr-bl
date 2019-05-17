@@ -84,6 +84,7 @@ class guppi_source(gr.sync_block):
             oldx = self.dx[:,self.idx:]
             oldy = self.dy[:,self.idx:]
         self.header, self.dx, self.dy = self.reader.read_next_data_block_int8(self.chan, self.nchan)
+        print("dx shape", self.dx.shape)
         self.dx = (self.dx[...,0].astype(np.float32) + 1.j*self.dx[...,1].astype(np.float32)).astype(np.complex64)
         self.dy = (self.dy[...,0].astype(np.float32) + 1.j*self.dy[...,1].astype(np.float32)).astype(np.complex64)
 
