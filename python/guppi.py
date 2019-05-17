@@ -238,7 +238,7 @@ class GuppiRaw(object):
         blocsize= int(header['BLOCSIZE'])
         if chan > 0:
             data_idx = head_idx + chan * n_pol * int(n_bit / 8)
-            blocsize //= (64//nchan)
+            blocsize //= (n_chan//nchan)
             n_chan = nchan
         else:
             data_idx = head_idx

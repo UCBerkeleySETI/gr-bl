@@ -48,13 +48,12 @@ class guppi_source(gr.sync_block):
         if self.idx < 0:
             work_done = self.set_data()
             self.data_iterator = self.output_generator()
-            self.idx = 0
         try:
             next_outs = next(self.data_iterator)
         except(StopIteration):
             work_done = self.set_data()
             self.data_iterator = self.output_generator()
-            self.idx = 0
+            
             next_outs = next(self.data_iterator)
         self.idx += self.buffer_size
         #print("buffer sizes", self.buffer_size, next_outs[0].shape)
@@ -92,11 +91,13 @@ class guppi_source(gr.sync_block):
             print(oldx.shape, self.dx.shape)
             self.dx = np.concatenate([oldx, self.dx], axis=-1)
             self.dy = np.concatenate([oldy, self.dy], axis=-1)
+            print(oldx.shape, self.dx.shape)
             oldx = None
             oldy = None
         self.block_size = self.dx.shape[-1]
         self.n_steps = int(self.block_size//self.buffer_size)
         self.block_idx += 1
+        self.idx = 0
 
         return 0
         
