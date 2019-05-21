@@ -33,10 +33,7 @@ GR_PYTHON_INSTALL(
     __init__.py
     guppi.py
     utils.py
-    keras_train.py
-    fb_source.py
-    guppi_source.py
-    multistream_qt.py DESTINATION ${GR_PYTHON_DIR}/bl
+    guppi_source.py DESTINATION ${GR_PYTHON_DIR}/bl
 )
 
 ########################################################################
